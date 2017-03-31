@@ -1,0 +1,49 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #151515;
+
+    width: 100%;
+    height: 100%;
+}
+
+h1 {
+    color: white;
+}
+
+#thecontainer {
+    display: flex;
+    flex-flow: column nowrap;
+    margin: auto;
+}
+
+#thecontainer > * {
+    display: block;
+    position: relative;
+    margin: auto;
+
+    justify-content: center;
+}
+
+#thecontainer .input-catcher {
+    position: absolute;
+}
+
+#buttoncontainer {
+    display: flex;
+    flex-flow: row nowrap
+}
+
+#canvascontainer {
+    display: flex;
+    flex-flow: column nowrap
+}
+
+canvas, .input-catcher {
+    display: block;
+    cursor: crosshair;
+}
+
+button {
+    padding: 10px 20px;
+}
