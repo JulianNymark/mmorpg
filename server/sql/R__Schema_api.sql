@@ -3,8 +3,8 @@
 DROP SCHEMA IF EXISTS api;
 CREATE SCHEMA api;
 
-DROP USER IF EXISTS 'mmorpg-api';
-CREATE USER 'mmorpg-api';
+DROP USER IF EXISTS "mmorpg-api";
+CREATE USER "mmorpg-api";
 
 ---- functions ----
 
@@ -18,4 +18,4 @@ $$ LANGUAGE plpgsql;
 
 ---- grants ----
 
-GRANT EXECUTE ON api.move(jsonb) TO 'mmorpg-api';
+GRANT EXECUTE ON FUNCTION api.move(jsonb) TO "mmorpg-api";
