@@ -1,0 +1,5 @@
+flyway.url=jdbc:postgresql://localhost/mmorpg
+flyway.schemas=public
+flyway.user=mmorpg
+flyway.password=mmorpg
+flyway.locations=filesystem:.
