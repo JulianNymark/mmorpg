@@ -1,6 +1,6 @@
 ---- stay fresh  ----
 
-DROP SCHEMA IF EXISTS api;
+DROP SCHEMA IF EXISTS api CASCADE;
 CREATE SCHEMA api;
 
 DROP USER IF EXISTS "mmorpg-api";
@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION api.move (
     p_input jsonb
 ) RETURNS jsonb AS $$
     BEGIN
-        RETURN p_input;
+        RETURN '{"cool":"beans"}';
     END;
 $$ LANGUAGE plpgsql;
 
