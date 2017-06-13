@@ -1,19 +1,15 @@
-export GOPATH := $(CURDIR)/go
-DEPS_SHORT := lib/pq
-DEPS := $(addprefix github.com/, $(DEPS_SHORT))
-PROGRAM := server
+export MMORPG_PG_PASSWORD:=d6c1d582-8af1-4154-88bb-91807eb209a9
 
-all: server
+.PHONY: all
+all : sass
+		python3.6 main.py
 
-$(PROGRAM): $(DEPS)
-	go build -o $@
+.PHONY: i
+i : sass
+		python3.6 -i main.py
 
-$(DEPS): go/src/$(DEPS)
+.PHONY: sass
+sass : static/css/style.css
 
-go/src/%:
-	go get -d $*
-
-clean:
-	$(RM)
-
-.PHONY: all clean $(DEPS)
+%.css : %.scss
+		sass $< $@
