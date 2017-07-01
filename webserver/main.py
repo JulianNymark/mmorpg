@@ -1,25 +1,37 @@
 #!/usr/bin/python3.6
 import asyncio
-import asyncpg
 import os
+import logging
 
 from sanic import Sanic
 from sanic import response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 app = Sanic()
-conn = None
 
-@app.route("/", methods=['POST', 'GET'])
+@app.route("/", methods=['POST'])
 async def hello(request):
-    global conn
+    logging.info('POST', request)
+    json_in = "meme"
+    json_out = """{"players":[
+    {"id":"1001", "pos":"42.0, 43.0"},
+    {"id":"1002", "pos":"4.0, 432.0"}
+    ]}"""
 
-    json_in = '{"cool":"meme"}' # TODO: from request
-    json_out = await conn.fetchrow(
-        'SELECT * FROM api.move($1)', json_in)
+    return response.json(
+        {
+            "players": [{"id":"1001", "pos":"42.0, 43.0"},
+                        {"id":"1002", "pos":"4.0, 432.0"}
+            ]
+        }
+    )
 
+@app.route("/", methods=['GET'])
+async def hello(request):
+    logging.info('GET', request)
     template = template_env.get_template('root.html')
-    rendered_template = await template.render_async(json_out)
+    rendered_template = await template.render_async()
+
     return response.html(
         rendered_template,
         headers={
@@ -35,7 +47,6 @@ async def hello(request):
 async def main():
     app.run(host="localhost", port=3000)
 
-
 async def asyncpg_setup():
     password = str(os.environ['MMORPG_PG_PASSWORD'])
     conn = await asyncpg.connect('postgresql://mmorpg@localhost/mmorpg', password=password)
@@ -50,10 +61,4 @@ if __name__ == "__main__":
         enable_async=True
     )
 
-    # asyncio.get_event_loop().run_until_complete(main())
-    print('before run()')
     app.run(host="localhost", port=3000)
-
-    loop = app.loop
-    loop.call_soon(asyncpg_setup())
-    print('end of "init"')
