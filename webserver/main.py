@@ -2,6 +2,7 @@
 import asyncio
 import os
 import logging
+import aioredis
 
 from sanic import Sanic
 from sanic import response
