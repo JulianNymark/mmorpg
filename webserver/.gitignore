@@ -1,1 +1,3 @@
 Makefile
+access.log
+error.log
