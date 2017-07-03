@@ -1,35 +1,28 @@
 #!/usr/bin/python3.6
-import asyncio
 import os
 import logging
+import asyncio
 import aioredis
+import json
 
 from sanic import Sanic
 from sanic import response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+conn = None
 app = Sanic()
+#password = str(os.environ['MMORPG_REDIS_PASSWORD'])
 
-@app.route("/", methods=['POST'])
-async def hello(request):
-    logging.info('POST', request)
-    json_in = "meme"
-    json_out = """{"players":[
-    {"id":"1001", "pos":"42.0, 43.0"},
-    {"id":"1002", "pos":"4.0, 432.0"}
-    ]}"""
+@app.route('/', methods=['POST'])
+async def handler(request):
+    logging.info('POST')
+    json_in = 'meme'
+    json_out = await getPlayers()
+    return response.json(json_out)
 
-    return response.json(
-        {
-            "players": [{"id":"1001", "pos":"42.0, 43.0"},
-                        {"id":"1002", "pos":"4.0, 432.0"}
-            ]
-        }
-    )
-
-@app.route("/", methods=['GET'])
-async def hello(request):
-    logging.info('GET', request)
+@app.route('/', methods=['GET'])
+async def handler(request):
+    logging.info('GET')
     template = template_env.get_template('root.html')
     rendered_template = await template.render_async()
 
@@ -46,15 +39,22 @@ async def hello(request):
     )
 
 async def main():
-    app.run(host="localhost", port=3000)
+    app.run(host='localhost', port=3000)
 
-async def asyncpg_setup():
-    password = str(os.environ['MMORPG_PG_PASSWORD'])
-    conn = await asyncpg.connect('postgresql://mmorpg@localhost/mmorpg', password=password)
-    print('end of asyncpg_setup()')
-    # await conn.close()
+@app.listener('before_server_start')
+async def setup_db(app, loop):
+    global conn
+    conn = await aioredis.create_connection(
+        ('localhost', 6379), encoding='utf-8')
 
-if __name__ == "__main__":
+async def getPlayers():
+    players = await conn.execute('JSON.GET', 'players')
+    return json.loads(players)
+
+async def addPlayer(name, pos):
+    players = await conn.execute('JSON.SET', '.', f'{pos[0]}, pos[1]')
+
+if __name__ == '__main__':
     # Load the template environment with async support
     template_env = Environment(
         loader=FileSystemLoader('./templates'),
@@ -62,4 +62,4 @@ if __name__ == "__main__":
         enable_async=True
     )
 
-    app.run(host="localhost", port=3000)
+    app.run(host='localhost', port=3000)
