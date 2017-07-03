@@ -58,7 +58,13 @@ async def getPlayers():
     return json.loads(players)
 
 async def addPlayer(name='anonymous', pos=[0,0]):
+    await conn.execute('JSON.SET', 'players:id', '.', '0', 'NX')
+    await conn.execute('JSON.SET', 'players', '.', '[]', 'NX')
+
+    player_id = await conn.execute('JSON.NUMINCRBY', 'players:id', '1')
+
     obj = {
+        "id" : player_id,
         "name" : name,
         "pos" : pos
     }

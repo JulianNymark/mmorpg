@@ -2,3 +2,4 @@ Makefile
 access.log
 error.log
 .#*
+__pycache__/
