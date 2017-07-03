@@ -13,10 +13,16 @@ conn = None
 app = Sanic()
 #password = str(os.environ['MMORPG_REDIS_PASSWORD'])
 
-@app.route('/', methods=['POST'])
+@app.route('/register', methods=['POST'])
 async def handler(request):
     logging.info('POST')
-    json_in = 'meme'
+    requestname = 'meme_man'
+    await addPlayer(name=requestname, pos=[1,2])
+    return response.json({"success":"success"})
+
+@app.route('/players', methods=['POST'])
+async def handler(request):
+    logging.info('POST')
     json_out = await getPlayers()
     return response.json(json_out)
 
@@ -51,8 +57,12 @@ async def getPlayers():
     players = await conn.execute('JSON.GET', 'players')
     return json.loads(players)
 
-async def addPlayer(name, pos):
-    players = await conn.execute('JSON.SET', '.', f'{pos[0]}, pos[1]')
+async def addPlayer(name='anonymous', pos=[0,0]):
+    obj = {
+        "name" : name,
+        "pos" : pos
+    }
+    players = await conn.execute('JSON.ARRAPPEND', 'players', '.', json.dumps(obj))
 
 if __name__ == '__main__':
     # Load the template environment with async support
