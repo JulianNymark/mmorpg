@@ -1,5 +1,4 @@
 #!/usr/bin/python3.6
-import os
 import logging
 import asyncio
 
@@ -8,21 +7,21 @@ from sanic import response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 import myaioredis as rj
+import api
 
 app = Sanic()
-#password = str(os.environ['MMORPG_REDIS_PASSWORD'])
 
 @app.route('/register', methods=['POST'])
 async def handler(request):
     logging.info('POST')
     requestname = 'meme_man'
-    await addPlayer(name=requestname, pos=[1,2])
+    await api.addPlayer(name=requestname, pos=[1,2])
     return response.json({"success":"success"})
 
 @app.route('/players', methods=['POST'])
 async def handler(request):
     logging.info('POST')
-    json_out = await getPlayers()
+    json_out = await api.getPlayers()
     return response.json(json_out)
 
 @app.route('/', methods=['GET'])
@@ -49,23 +48,6 @@ async def main():
 @app.listener('before_server_start')
 async def setup_db(app, loop):
     await rj.setup()
-
-async def getPlayers():
-    players = await rj.GET('players')
-    return players
-
-async def addPlayer(name='anonymous', pos=[0,0]):
-    await rj.SET('players:id', '.', '0', 'NX')
-    await rj.SET('players', '.', '[]', 'NX')
-
-    player_id = await rj.NUMINCRBY('players:id', '1')
-
-    obj = {
-        "id" : player_id,
-        "name" : name,
-        "pos" : pos
-    }
-    players = await rj.ARRAPPEND('players', '.', obj)
 
 if __name__ == '__main__':
     # Load the template environment with async support
