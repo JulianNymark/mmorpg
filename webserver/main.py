@@ -2,14 +2,13 @@
 import os
 import logging
 import asyncio
-import aioredis
-import json
 
 from sanic import Sanic
 from sanic import response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-conn = None
+import myaioredis as rj
+
 app = Sanic()
 #password = str(os.environ['MMORPG_REDIS_PASSWORD'])
 
@@ -49,26 +48,28 @@ async def main():
 
 @app.listener('before_server_start')
 async def setup_db(app, loop):
-    global conn
-    conn = await aioredis.create_connection(
-        ('localhost', 6379), encoding='utf-8')
+    await rj.setup()
 
 async def getPlayers():
-    players = await conn.execute('JSON.GET', 'players')
-    return json.loads(players)
+    players = await rj.GET('players')
+    return players
 
 async def addPlayer(name='anonymous', pos=[0,0]):
-    await conn.execute('JSON.SET', 'players:id', '.', '0', 'NX')
-    await conn.execute('JSON.SET', 'players', '.', '[]', 'NX')
+    await rj.SET('players:id', '.', '0', 'NX')
+    await rj.SET('players', '.', '[]', 'NX')
+    # await conn.execute('JSON.SET', 'players:id', '.', '0', 'NX')
+    # await conn.execute('JSON.SET', 'players', '.', '[]', 'NX')
 
-    player_id = await conn.execute('JSON.NUMINCRBY', 'players:id', '1')
+    player_id = await rj.NUMINCRBY('players:id', '1')
+    # player_id = await conn.execute('JSON.NUMINCRBY', 'players:id', '1')
 
     obj = {
         "id" : player_id,
         "name" : name,
         "pos" : pos
     }
-    players = await conn.execute('JSON.ARRAPPEND', 'players', '.', json.dumps(obj))
+    players = await rj.ARRAPPEND('players', '.', obj)
+    # players = await conn.execute('JSON.ARRAPPEND', 'players', '.', json.dumps(obj))
 
 if __name__ == '__main__':
     # Load the template environment with async support
