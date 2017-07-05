@@ -57,11 +57,8 @@ async def getPlayers():
 async def addPlayer(name='anonymous', pos=[0,0]):
     await rj.SET('players:id', '.', '0', 'NX')
     await rj.SET('players', '.', '[]', 'NX')
-    # await conn.execute('JSON.SET', 'players:id', '.', '0', 'NX')
-    # await conn.execute('JSON.SET', 'players', '.', '[]', 'NX')
 
     player_id = await rj.NUMINCRBY('players:id', '1')
-    # player_id = await conn.execute('JSON.NUMINCRBY', 'players:id', '1')
 
     obj = {
         "id" : player_id,
@@ -69,7 +66,6 @@ async def addPlayer(name='anonymous', pos=[0,0]):
         "pos" : pos
     }
     players = await rj.ARRAPPEND('players', '.', obj)
-    # players = await conn.execute('JSON.ARRAPPEND', 'players', '.', json.dumps(obj))
 
 if __name__ == '__main__':
     # Load the template environment with async support
