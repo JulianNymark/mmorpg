@@ -26,9 +26,7 @@ async def ARRAPPEND(*arg):
     global conn
 
     arglist = list(arg)
-    print('arglist:', arglist)
     arglist[2] = json.dumps(arglist[2])
-    print('arglist(modified):', arglist)
     await conn.execute('JSON.ARRAPPEND', *arglist)
 
 async def NUMINCRBY(*arg):
