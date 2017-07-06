@@ -1,5 +1,4 @@
 #!/usr/bin/python3.6
-import logging
 import asyncio
 
 from sanic import Sanic
@@ -13,20 +12,26 @@ app = Sanic()
 
 @app.route('/register', methods=['POST'])
 async def handler(request):
-    logging.info('POST')
     requestname = 'meme_man'
     await api.addPlayer(name=requestname, pos=[1,2])
     return response.json({"success":"success"})
 
 @app.route('/players', methods=['POST'])
 async def handler(request):
-    logging.info('POST')
     json_out = await api.getPlayers()
+    return response.json(json_out)
+
+@app.route('/world', methods=['POST'])
+async def handler(request):
+    # TODO limit size of request
+    # TODO limit size of rect (logic here or -> api or -> redis?)
+    print('#####################')
+    json_in = request.json
+    json_out = await api.getWorld(json_in['rect'])
     return response.json(json_out)
 
 @app.route('/', methods=['GET'])
 async def handler(request):
-    logging.info('GET')
     template = template_env.get_template('root.html')
     rendered_template = await template.render_async()
 
@@ -42,9 +47,6 @@ async def handler(request):
         status=200
     )
 
-async def main():
-    app.run(host='localhost', port=3000)
-
 @app.listener('before_server_start')
 async def setup_db(app, loop):
     await rj.setup()
@@ -57,4 +59,4 @@ if __name__ == '__main__':
         enable_async=True
     )
 
-    app.run(host='localhost', port=3000)
+    app.run(host='localhost', port=3000, debug=True)

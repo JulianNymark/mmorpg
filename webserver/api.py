@@ -5,9 +5,6 @@ async def getPlayers():
     return players
 
 async def addPlayer(name='anonymous', pos=[0,0]):
-    await rj.SET('players:id', '.', '0', 'NX')
-    await rj.SET('players', '.', '[]', 'NX')
-
     player_id = await rj.NUMINCRBY('players:id', '1')
 
     obj = {
@@ -16,3 +13,9 @@ async def addPlayer(name='anonymous', pos=[0,0]):
         "pos" : pos
     }
     players = await rj.ARRAPPEND('players', '.', obj)
+
+async def getWorld(rect):
+    # world = await rj.GET('world', '[0][1]')
+    # TODO... some EVAL script
+    world = await rj.EVAL("return {{1,1},{1,0}}", 0)
+    return world
