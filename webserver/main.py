@@ -1,11 +1,11 @@
 #!/usr/bin/python3.6
 import asyncio
+import psycopg2
 
 from sanic import Sanic
 from sanic import response
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-import myaioredis as rj
 import api
 
 app = Sanic()
@@ -49,7 +49,7 @@ async def handler(request):
 
 @app.listener('before_server_start')
 async def setup_db(app, loop):
-    await rj.setup()
+    pass
 
 if __name__ == '__main__':
     # Load the template environment with async support
