@@ -1,6 +1,7 @@
 #!/usr/bin/python3.6
 import asyncio
-import psycopg2
+import asyncpg
+import os
 
 from sanic import Sanic
 from sanic import response
@@ -9,16 +10,18 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 import api
 
 app = Sanic()
+conn = None
 
 @app.route('/register', methods=['POST'])
 async def handler(request):
     requestname = 'meme_man'
-    await api.addPlayer(name=requestname, pos=[1,2])
+
+    await api.addPlayer(conn, name=requestname, pos=[1,2])
     return response.json({"success":"success"})
 
 @app.route('/players', methods=['POST'])
 async def handler(request):
-    json_out = await api.getPlayers()
+    json_out = await api.getPlayers(conn )
     return response.json(json_out)
 
 @app.route('/world', methods=['POST'])
@@ -27,7 +30,7 @@ async def handler(request):
     # TODO limit size of rect (logic here or -> api or -> redis?)
     print('#####################')
     json_in = request.json
-    json_out = await api.getWorld(json_in['rect'])
+    json_out = await api.getWorld(conn, json_in['rect'])
     return response.json(json_out)
 
 @app.route('/', methods=['GET'])
@@ -48,8 +51,11 @@ async def handler(request):
     )
 
 @app.listener('before_server_start')
-async def setup_db(app, loop):
-    pass
+async def connect_to_db(app, loop):
+    global conn
+    password = os.environ['MMORPG_PG_PASSWORD']
+    conn = await asyncpg.connect(user='mmorpg', password=f'{password}',
+                                 database='mmorpg', host='127.0.0.1')
 
 if __name__ == '__main__':
     # Load the template environment with async support
