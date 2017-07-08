@@ -7,6 +7,7 @@ async def players():
 
 async def player_add(name, pos):
     success = await conn.fetch('''SELECT (true);''')
+    return success
 
 async def player_move():
     # move the given player id, to a neighboring cell
