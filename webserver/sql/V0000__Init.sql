@@ -11,26 +11,39 @@ CREATE TABLE accounts (
     )
 );
 
-CREATE TABLE sessions (
-    session BIGSERIAL PRIMARY KEY,
+CREATE TABLE account_sessions (
+    account_session BIGSERIAL PRIMARY KEY,
     uuid uuid DEFAULT uuid_generate_v4() NOT NULL,
     ctime timestamptz DEFAULT now() NOT NULL,
+
     account bigint NOT NULL,
     is_valid bool DEFAULT true NOT NULL,
+    ip_address inet NOT NULL,
+    country_code varchar(2),
 
     FOREIGN KEY (account) REFERENCES accounts (account)
 );
 
--- trigger set all other sessions to 'invalid' on new session
-CREATE FUNCTION sessions_invalidate_old() RETURNS trigger AS
+CREATE INDEX valid_sessions_idx ON account_sessions (account_session)
+WHERE is_valid IS true;
+
+-- CREATE TABLE valid_sessions (
+--     valid_session BIGSERIAL PRIMARY KEY,
+--     account_session bigint,
+
+--     FOREIGN KEY (account_session) REFERENCES account_sessions (account_session)
+-- );
+
+-- trigger set all other account_sessions to 'invalid' on new account_session
+CREATE FUNCTION account_sessions_new() RETURNS trigger AS
 $$ BEGIN
-    UPDATE sessions SET is_valid = false
-    WHERE session <> NEW.session;
+    UPDATE account_sessions SET is_valid = false
+    WHERE account_session <> NEW.account_session;
     RETURN NEW;
 END; $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER sessions_invalidate_old AFTER INSERT ON sessions
-FOR EACH ROW EXECUTE PROCEDURE sessions_invalidate_old();
+CREATE TRIGGER account_sessions_new AFTER INSERT ON account_sessions
+FOR EACH ROW EXECUTE PROCEDURE account_sessions_new();
 
 CREATE TABLE players (
     player BIGSERIAL PRIMARY KEY,
