@@ -1,13 +1,16 @@
+CREATE EXTENSION IF NOT EXISTS "citext";
+
 CREATE TABLE accounts (
     account BIGSERIAL PRIMARY KEY,
-    email citext UNIQUE NOT NULL,
+    email citext UNIQUE NOT NULL
 );
 
 CREATE TABLE sessions (
     session BIGSERIAL PRIMARY KEY,
-    ctime DEFAULT now() NOT NULL,
+    ctime timestamptz DEFAULT now() NOT NULL,
+    account bigint UNIQUE NOT NULL,
 
-    REFERENCES account USING (account)
+    FOREIGN KEY (account) REFERENCES accounts (account)
 );
 
 CREATE TABLE players (
@@ -27,7 +30,7 @@ CREATE TABLE terrain_tiles (
     terrain_tile BIGSERIAL PRIMARY KEY,
     x bigint NOT NULL,
     y bigint NOT NULL,
-    mtime DEFAULT now() NOT NULL, -- 'for clientside caching terrain'
+    mtime timestamptz DEFAULT now() NOT NULL, -- 'for clientside caching terrain'
     terrain terrain_type NOT NULL, -- visual
     passable boolean DEFAULT true NOT NULL,
 
