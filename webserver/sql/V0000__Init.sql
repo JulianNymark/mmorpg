@@ -1,17 +1,36 @@
 CREATE EXTENSION IF NOT EXISTS "citext";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE accounts (
     account BIGSERIAL PRIMARY KEY,
-    email citext UNIQUE NOT NULL
+    email citext UNIQUE NOT NULL,
+
+    CHECK (
+        char_length(email) < 255
+        AND email ~ '@'
+    )
 );
 
 CREATE TABLE sessions (
     session BIGSERIAL PRIMARY KEY,
+    uuid uuid DEFAULT uuid_generate_v4() NOT NULL,
     ctime timestamptz DEFAULT now() NOT NULL,
-    account bigint UNIQUE NOT NULL,
+    account bigint NOT NULL,
+    is_valid bool DEFAULT true NOT NULL,
 
     FOREIGN KEY (account) REFERENCES accounts (account)
 );
+
+-- trigger set all other sessions to 'invalid' on new session
+CREATE FUNCTION sessions_invalidate_old() RETURNS trigger AS
+$$ BEGIN
+    UPDATE sessions SET is_valid = false
+    WHERE session <> NEW.session;
+    RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER sessions_invalidate_old AFTER INSERT ON sessions
+FOR EACH ROW EXECUTE PROCEDURE sessions_invalidate_old();
 
 CREATE TABLE players (
     player BIGSERIAL PRIMARY KEY,
