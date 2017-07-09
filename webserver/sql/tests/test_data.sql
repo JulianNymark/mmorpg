@@ -31,8 +31,11 @@ $$ LANGUAGE plpgsql STABLE;
 
 ---------------------
 
--- TODO raise requires plpgsql?
--- RAISE INFO 'generating 1M accounts';
+DO $$
+    BEGIN
+        RAISE INFO 'generating 1000 accounts';
+    END;
+$$;
 
 INSERT INTO accounts (email)
 WITH random_emails as (
@@ -41,7 +44,11 @@ WITH random_emails as (
 SELECT * FROM random_emails;
 
 -- TODO plpgsql for loop
--- RAISE INFO 'generating 10M sessions (random pick from existing accounts)';
+DO $$
+    BEGIN
+        RAISE INFO 'generating 1 session per account!';
+    END;
+$$;
 
 INSERT INTO account_sessions (account, ip_address)
 WITH sa AS (
@@ -49,8 +56,24 @@ WITH sa AS (
 )
 SELECT sa.account, '123.123.123.123'::inet FROM sa;
 
+DO $$
+    BEGIN
+        RAISE INFO 'generating 1 session per account!';
+    END;
+$$;
 INSERT INTO account_sessions (account, ip_address)
 WITH sa AS (
     SELECT * FROM accounts
 )
 SELECT sa.account, '123.123.123.123'::inet FROM sa;
+
+-- MAP data
+DO $$
+BEGIN
+   RAISE INFO 'MAP DATA';
+   -- loop for x and y
+    FOR i IN 1..25 LOOP
+        -- memes
+    END LOOP;
+END;
+$$;
