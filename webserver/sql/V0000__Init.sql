@@ -17,28 +17,39 @@ CREATE TABLE account_sessions (
     ctime timestamptz DEFAULT now() NOT NULL,
 
     account bigint NOT NULL,
-    is_valid bool DEFAULT true NOT NULL,
     ip_address inet NOT NULL,
+
     country_code varchar(2),
 
     FOREIGN KEY (account) REFERENCES accounts (account)
 );
 
-CREATE INDEX valid_sessions_idx ON account_sessions (account_session)
-WHERE is_valid IS true;
+-- CREATE INDEX valid_sessions_idx ON account_sessions (account_session)
+-- WHERE is_valid IS true;
+--
+-- ?? ^^ exhibits strange behaviour... slow inserting on sessions
+-- ...trying without partial index
 
--- CREATE TABLE valid_sessions (
---     valid_session BIGSERIAL PRIMARY KEY,
---     account_session bigint,
+CREATE TABLE valid_account_sessions (
+    valid_account_session BIGSERIAL PRIMARY KEY,
+    account_session bigint NOT NULL,
+    account bigint NOT NULL UNIQUE,
 
---     FOREIGN KEY (account_session) REFERENCES account_sessions (account_session)
--- );
+    FOREIGN KEY (account) REFERENCES accounts (account), -- TODO: DRY? ^
+    FOREIGN KEY (account_session) REFERENCES account_sessions (account_session)
+);
 
 -- trigger set all other account_sessions to 'invalid' on new account_session
 CREATE FUNCTION account_sessions_new() RETURNS trigger AS
 $$ BEGIN
-    UPDATE account_sessions SET is_valid = false
-    WHERE account_session <> NEW.account_session;
+    -- drop all other valid account sessions owned by that account
+    DELETE FROM valid_account_sessions
+    WHERE account = NEW.account;
+
+    INSERT INTO valid_account_sessions
+    (account_session, account)
+    VALUES
+    (NEW.account_session, NEW.account);
     RETURN NEW;
 END; $$ LANGUAGE plpgsql;
 

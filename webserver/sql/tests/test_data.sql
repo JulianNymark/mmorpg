@@ -31,22 +31,26 @@ $$ LANGUAGE plpgsql STABLE;
 
 ---------------------
 
-RAISE INFO 'generating 1M accounts';
+-- TODO raise requires plpgsql?
+-- RAISE INFO 'generating 1M accounts';
 
 INSERT INTO accounts (email)
 WITH random_emails as (
-    SELECT alphanum_string || '@email.com' FROM random_alphanums(10, 1000000)
+    SELECT alphanum_string || '@email.com' FROM random_alphanums(10, 1000)
 )
 SELECT * FROM random_emails;
 
-RAISE INFO 'generating 10M sessions (random pick from existing accounts)';
+-- TODO plpgsql for loop
+-- RAISE INFO 'generating 10M sessions (random pick from existing accounts)';
 
-INSERT INTO sessions (email) -- WIP
-WITH random_emails as (
-    SELECT alphanum_string || '@email.com' FROM random_alphanums(10, 1000000)
+INSERT INTO account_sessions (account, ip_address)
+WITH sa AS (
+    SELECT * FROM accounts
 )
-SELECT * FROM random_emails;
+SELECT sa.account, '123.123.123.123'::inet FROM sa;
 
-
-INSERT INTO account_sessions (account, is_valid, ip_address, country_code)
-VALUES ();
+INSERT INTO account_sessions (account, ip_address)
+WITH sa AS (
+    SELECT * FROM accounts
+)
+SELECT sa.account, '123.123.123.123'::inet FROM sa;
