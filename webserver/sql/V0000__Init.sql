@@ -90,5 +90,8 @@ CREATE TABLE terrain_tiles (
 --
 -- what about players inventories? they could keep resources there indefinitely... :thinking:
 --
+-- should let players play the game fully _without_ an account / email... then create one if they want
+-- to get the advantages an account brings (persistent playerdata stored remotely? email spam?... etc)
+--
 -- IDEA:
 -- accounts correspond to 'ghosts' that can possess a player in the world...

@@ -77,3 +77,8 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+---------------- some 'specific' data
+
+INSERT INTO players (username, x, y) VALUES ('player1', 42, 42);
+INSERT INTO players (username, x, y) VALUES ('player2', 43, 43);
